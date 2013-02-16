@@ -79,7 +79,7 @@ def guid_to_id(guid):
 
 def id_to_guid(id):
     """Transforms the internal id representation into a guid."""
-    s = int2str(int(id, 36), base=16)
+    s = int2str(int(id, 36), base=16).rjust(32, '0')
     return "-".join([s[:8], s[8:12], s[12:16], s[16:20], s[20:]])
 
 def note_store_connect(url):
