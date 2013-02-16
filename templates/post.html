@@ -3,8 +3,10 @@
 {% block title %}{{ post.title }}{% endblock %}
 
 {% block content %}
-    <h1>{{ post.title }}</h1>
-    <div id="post">
+    <h1 id="post_title">{{ post.title }}</h1>
+    <h2 id="author">posted in <a href="/{{ username }}/{{ puburi }}/">{{ username }}/{{ puburi }}</a></h2>
+
+    <div id="post_content">
         {{ post.html }}
     </div>
 {% endblock %}

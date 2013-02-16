@@ -3,8 +3,10 @@
 {% block title %}{{ index.name }}{% endblock %}
 
 {% block content %}
-    <h1>{{ index.name }}</h1>
-    <ul>
+    <h1 id="blog_name">{{ index.name }}</h1>
+    <h2 id="author">by {{ username }}</h2>
+
+    <ul id="posts">
     {% for post in index.posts %}
         <li>
             <a href="/{{ username }}/{{ puburi }}/{{ post.id }}" title="{{ post.title }}">{{ post.title }}</a>
@@ -12,12 +14,12 @@
     {% endfor %}
     </ul>
     {% if page > 1 %}
-        <p>
+        <p id="previous_page">
             <a href="/{{ username }}/{{ puburi }}/?page={{ page - 1}}" title="previous page">Previous page ({{ page - 1}})</a>
         </p>
     {% endif %}
     {% if index.has_next %}
-        <p>
+        <p id="next_page">
             <a href="/{{ username }}/{{ puburi }}/?page={{ page + 1 }}" title="next page">Next page ({{ page + 1}})</a>
         </p>
     {% endif %}

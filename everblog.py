@@ -17,20 +17,7 @@ from evernote.edam.userstore import UserStore
 import thrift.protocol.TBinaryProtocol as TBinaryProtocol
 import thrift.transport.THttpClient as THttpClient
 
-#: Number of post per page
-PAGE_SIZE = 50
-
-#: The memcache server list
-MEMCACHE_SERVERS = ["localhost:11211"]
-
-#: The directory to find static files
-STATIC_ROOT = 'static'
-
-#: Default redirection from root /
-DEFAULT_ROOT = '/rsetti/everblog/'
-
-#: Default puburi name to redirect from username
-DEFAULT_PUBURI = 'blog'
+from config import *
 
 #: Used to create ids from/to guids
 ID_SYMBOLS = '0123456789abcdefghijklmnopqrstuvwxyz'
@@ -75,7 +62,7 @@ class Post(object):
     """A representation of a post."""
     def __init__(self, note):
         self.title = note.title
-        self.html = note.content
+        self.html = note.content.decode('utf-8')
 
 def int2str(num, base=16):
     """Transforms an integer into an arbitrary base string."""
@@ -179,8 +166,9 @@ def index_handler(username, puburi, page=1, **kwars):
 
     # render index into HTML
     template = template_env.get_template('index.html')
-    data = template.render(index=index, username=username, puburi=puburi, page=page).encode('utf-8')
-    return [data]
+    data = template.render(STATIC_URL=STATIC_URL, index=index,
+                           username=username, puburi=puburi, page=page)
+    return [data.encode('utf-8')], [("Content-Type", "text/html")]
 
 POST_RE = re.compile(r'^/([\w_\-\+\.]{1,255})/([\w_\-\+\.]+)/([a-z0-9]+)/?$')
 def post_handler(username, puburi, post_id, **kwargs):
@@ -192,8 +180,9 @@ def post_handler(username, puburi, post_id, **kwargs):
 
     # render post to HTML
     template = template_env.get_template('post.html')
-    data = template.render(post=post, username=username, puburi=puburi, post_id=post_id).encode('utf-8')
-    return [data]
+    data = template.render(STATIC_URL=STATIC_URL, post=post, username=username,
+                           puburi=puburi, post_id=post_id)
+    return [data.encode('utf-8')], [("Content-Type", "text/html")]
 
 STATIC_RE = re.compile(r'^/static/(\w[\w\-_\/]+(?:\.css|\.js|\.html))$')
 @cached()
@@ -202,8 +191,13 @@ def static_handler(path):
     filename = os.path.join(STATIC_ROOT, path)
     if not os.path.exists(filename):
         raise NotFoundException(data="")
+
+    if path.endswith('.css'): mime = 'text/css'
+    elif path.endswith('.js'): mime = 'application/javascript'
+    else: mime = 'application/octet-stream'
+
     with open(filename) as f:
-        return [f.read()]
+        return [f.read()], [('Content-Type', mime)]
 
 #: The list of matching regular expression paired with the callable handler
 HANDLERS = ((ROOT_RE, root_handler),
@@ -243,7 +237,7 @@ def application(environment, start_response):
         for regexp, handler in HANDLERS:
             m = regexp.match(url)
             if m:
-                data = handler(*m.groups(), **query_params)
+                data, headers = handler(*m.groups(), **query_params)
                 break
         else:
             raise NotFoundException()
@@ -251,9 +245,7 @@ def application(environment, start_response):
         start_response(e.status, e.headers)
         return [e.data]
 
-    start_response("200 OK", [
-        ("Content-Type", "text/html"),
-    ])
+    start_response("200 OK", headers)
     return data
 
 # Start memcache client
