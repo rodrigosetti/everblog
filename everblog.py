@@ -4,20 +4,20 @@
 A Web application that transforms an Evernote public notebook into a blog.
 """
 
-import memcache
 import os
 import re
 from urlparse import parse_qsl
 
-import jinja2
-
 from evernote.edam.error.ttypes import EDAMUserException, EDAMSystemException, EDAMNotFoundException
 from evernote.edam.notestore import NoteStore
 from evernote.edam.userstore import UserStore
+import jinja2
+import memcache
 import thrift.protocol.TBinaryProtocol as TBinaryProtocol
 import thrift.transport.THttpClient as THttpClient
 
 from config import *
+from enml import HTMLNote
 
 #: Used to create ids from/to guids
 ID_SYMBOLS = '0123456789abcdefghijklmnopqrstuvwxyz'
@@ -60,9 +60,9 @@ class Index(object):
 
 class Post(object):
     """A representation of a post."""
-    def __init__(self, note):
+    def __init__(self, note, shard_id):
         self.title = note.title
-        self.html = note.content.decode('utf-8')
+        self.html = HTMLNote(note, shard_id).to_html()
 
 def int2str(num, base=16):
     """Transforms an integer into an arbitrary base string."""
@@ -140,7 +140,7 @@ def get_post(username, puburi, post_id):
     user = get_user(username)
     notebook = get_notebook(user.noteStoreUrl, user.userId, puburi)
     note = get_note(user.noteStoreUrl, id_to_guid(post_id))
-    return Post(note)
+    return Post(note, user.shardId)
 
 ROOT_RE = re.compile(r'^/?$')
 def root_handler():

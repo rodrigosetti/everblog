@@ -25,7 +25,6 @@ a good idea to let another server handle the statics, mapped in `STATIC_URL`).
 
 ## TODO
 
- * Parse ENML correctly (show attachments).
  * Show tags.
  * Allow comments.
 
