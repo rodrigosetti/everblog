@@ -9,6 +9,7 @@ import re
 from urlparse import parse_qsl
 
 from evernote.edam.error.ttypes import EDAMUserException, EDAMSystemException, EDAMNotFoundException
+from evernote.edam.type.ttypes import NoteSortOrder
 from evernote.edam.notestore import NoteStore
 from evernote.edam.userstore import UserStore
 import jinja2
@@ -104,7 +105,9 @@ def get_user(username):
 def get_notes(note_store_url, notebook_guid, offset, limit):
     """Get a list of notes metadata from the notebook."""
     note_store = note_store_connect(note_store_url)
-    note_filter = NoteStore.NoteFilter(notebookGuid=notebook_guid)
+    note_filter = NoteStore.NoteFilter(order=NoteSortOrder.CREATED,
+                                       ascending=False,
+                                       notebookGuid=notebook_guid)
     result_spec = NoteStore.NotesMetadataResultSpec(includeTitle=True)
     return note_store.findNotesMetadata("", note_filter, offset, limit, result_spec)
 
