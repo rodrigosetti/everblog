@@ -13,14 +13,14 @@
         </li>
     {% endfor %}
     </ul>
-    {% if page > 1 %}
-        <p id="previous_page">
-            <a href="/{{ username }}/{{ puburi }}/?page={{ page - 1}}" title="previous page">Previous page ({{ page - 1}})</a>
-        </p>
-    {% endif %}
-    {% if index.has_next %}
-        <p id="next_page">
-            <a href="/{{ username }}/{{ puburi }}/?page={{ page + 1 }}" title="next page">Next page ({{ page + 1}})</a>
+    {% if page > 1 or index.has_next %}
+        <p id="page_navigation">
+            {% if page > 1 %}
+                <a id="previous" href="/{{ username }}/{{ puburi }}/?page={{ page - 1}}" title="previous page">Previous page</a>
+            {% endif %}
+            {% if index.has_next %}
+                <a id="next" href="/{{ username }}/{{ puburi }}/?page={{ page + 1 }}" title="next page">Next page</a>
+            {% endif %}
         </p>
     {% endif %}
 {% endblock %}
