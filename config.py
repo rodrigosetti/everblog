@@ -17,3 +17,8 @@ DEFAULT_ROOT = '/rsetti/everblog/'
 #: Default puburi name to redirect from username
 DEFAULT_PUBURI = 'blog'
 
+try:
+    from config_local import *
+except ImportError:
+    pass
+

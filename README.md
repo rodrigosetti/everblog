@@ -14,8 +14,9 @@ you can run as:
 
     $ gunicorn everblog:application
 
-Also, please read and edit `config.py` with you local configurations (i.e. it's
-a good idea to let another server handle the statics, mapped in `STATIC_URL`).
+Also, please read `config.py` and create a file `config_local.py` with you
+local configurations (i.e. it's a good idea to let another server handle the
+statics, mapped in `STATIC_URL`).
 
 ## Requirements
 
