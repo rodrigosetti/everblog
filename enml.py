@@ -40,7 +40,7 @@ class HTMLNote(object):
                 element.setAttribute('src',
                                  "https://www.evernote.com/shard/%s/res/%s/%s?resizeSmall=1&width=%d" %
                                      (self.shard_id, resource.guid, resource.attributes.fileName, img_width))
-                element.setAttribute('width', str(img_width))
+                element.setAttribute('width', str(min(img_width, resource.width)))
                 if element.hasAttribute('height'): element.removeAttribute('height')
             else:
                 element.tagName = 'a'
