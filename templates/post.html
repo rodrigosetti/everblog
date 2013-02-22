@@ -4,7 +4,11 @@
 
 {% block content %}
     <h1 id="post_title">{{ post.title }}</h1>
-    <h2 id="author">posted in <a href="/{{ username }}/{{ puburi }}/">{{ username }}/{{ puburi }}</a></h2>
+    {% if post.page <= 1 %}
+        <h2 id="author">posted in <a href="/{{ username }}/{{ puburi }}/">{{ username }}/{{ puburi }}</a></h2>
+    {% else %}
+        <h2 id="author">posted in <a href="/{{ username }}/{{ puburi }}/?page={{ post.page }}">{{ username }}/{{ puburi }}</a></h2>
+    {% endif %}
 
     <div id="post_content">
         {{ post.html }}

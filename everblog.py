@@ -58,12 +58,12 @@ class Index(object):
                        'id': guid_to_id(note.guid)} for note in note_list.notes]
         self.has_next = note_list.totalNotes - (note_list.startIndex + len(note_list.notes)) > 0
 
-
 class Post(object):
     """A representation of a post."""
-    def __init__(self, note, shard_id):
+    def __init__(self, note, shard_id, page=1):
         self.title = note.title
         self.html = HTMLNote(note, shard_id).to_html()
+        self.page = page
 
 def int2str(num, base=16):
     """Transforms an integer into an arbitrary base string."""
@@ -109,7 +109,18 @@ def get_notes(note_store_url, notebook_guid, offset, limit):
                                        ascending=False,
                                        notebookGuid=notebook_guid)
     result_spec = NoteStore.NotesMetadataResultSpec(includeTitle=True)
-    return note_store.findNotesMetadata("", note_filter, offset, limit, result_spec)
+    note_list = note_store.findNotesMetadata("", note_filter, offset, limit, result_spec)
+    if not note_list.notes: raise NotFoundException(data="Empty page.")
+    else:
+        return note_list
+
+@cached(12*HOUR)
+def get_note_offset(note_store_url, notebook_guid, note_guid):
+    note_store = note_store_connect(note_store_url)
+    note_filter = NoteStore.NoteFilter(order=NoteSortOrder.CREATED,
+                                       ascending=False,
+                                       notebookGuid=notebook_guid)
+    return note_store.findNoteOffset("", note_filter, note_guid)
 
 @cached(48*HOUR)
 def get_notebook(note_store_url, user_id, puburi):
@@ -143,7 +154,8 @@ def get_post(username, puburi, post_id):
     user = get_user(username)
     notebook = get_notebook(user.noteStoreUrl, user.userId, puburi)
     note = get_note(user.noteStoreUrl, id_to_guid(post_id))
-    return Post(note, user.shardId)
+    page = (get_note_offset(user.noteStoreUrl, notebook.guid, note.guid) / PAGE_SIZE) + 1
+    return Post(note, user.shardId, page)
 
 ROOT_RE = re.compile(r'^/?$')
 def root_handler():
