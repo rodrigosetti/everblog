@@ -54,14 +54,14 @@ class Index(object):
     """A wrapper to a collection of posts. Index."""
     def __init__(self, name, note_list):
         self.name = name
-        self.posts = [{'title': note.title,
+        self.posts = [{'title': note.title.decode('utf-8'),
                        'id': guid_to_id(note.guid)} for note in note_list.notes]
         self.has_next = note_list.totalNotes - (note_list.startIndex + len(note_list.notes)) > 0
 
 class Post(object):
     """A representation of a post."""
     def __init__(self, note, shard_id, page=1):
-        self.title = note.title
+        self.title = note.title.decode('utf-8')
         self.html = HTMLNote(note, shard_id).to_html()
         self.page = page
 
